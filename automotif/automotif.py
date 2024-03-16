@@ -21,7 +21,6 @@ import os
 from dotmotif import Motif
 from itertools import product
 import dotmotif.executors as executors
-import hashlib
 from typing import Union
 
 class AutoMotif:
@@ -60,6 +59,8 @@ class AutoMotif:
             raise ValueError("Save should be a boolean")
         elif size < 3:
             print("Warning: Size should be greater than 2")
+        elif size > 10:
+            print("Warning: Motif detection after size 10 may become unstable")
         elif upto and verbose:
             print(f"Warning: Upto is set to True, this will generate motifs from size {lower} to {size}")
         elif save and path == None:
@@ -184,9 +185,8 @@ class AutoMotif:
         - str: Unique filename.
         """
         edge_str = ";".join(f"{source}-{target}" for source, target in edges)        
-        hash_part = hashlib.sha256(edge_str.encode('utf-8')).hexdigest()[:8]  
         simplified_edges = "_".join(f"{source}to{target}" for source, target in edges[:max_edges_in_name])
-        filename = f"{hash_part}_{simplified_edges}.csv"
+        filename = f"{simplified_edges}.csv"
         return self.sanitize_filename(filename)
 
     def find_motifs(self, motif, size, save: bool = None):
