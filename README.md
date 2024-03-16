@@ -9,7 +9,7 @@ pip install automotifs
 ```
 ## Quick Start
 ```python
-from automotifs import AutoMotif
+from automotif import AutoMotif
 import networkx as nx
 # Example: A random directed graph
 G = nx.gnp_random_graph(100, 0.5, directed=True)
