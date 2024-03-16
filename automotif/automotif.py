@@ -22,6 +22,7 @@ from dotmotif import Motif
 from itertools import product
 import dotmotif.executors as executors
 import hashlib
+from typing import Union
 
 class AutoMotif:
     """
@@ -39,7 +40,7 @@ class AutoMotif:
     - verbose (bool, optional): Whether to print progress. Defaults to False.
     """
     def __init__(self, 
-                 Graph: nx.Graph, 
+                 Graph: Union[nx.Graph, nx.DiGraph, nx.MultiGraph, nx.MultiDiGraph], 
                  size: int, 
                  directed: bool = False, 
                  allow_automorphism: bool = False, 
@@ -49,8 +50,8 @@ class AutoMotif:
                  path: str = None,
                  find: bool = False, 
                  verbose: bool = False):
-        if type(Graph) != nx.classes.graph.Graph:
-            raise ValueError("Graph should be a networkx graph")
+        if not hasattr(Graph, "nodes") or not callable(getattr(Graph, "nodes")):
+            raise ValueError("Graph should be a NetworkX graph")
         elif type(size) != int:
             raise ValueError("Size should be an integer")
         elif type(upto) != bool:
