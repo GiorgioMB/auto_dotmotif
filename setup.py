@@ -4,7 +4,7 @@ with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 setup(
     name='automotifs',
-    version='0.6',
+    version='1.1',
     packages=find_packages(),
     description='A wrapper for automatic Motif Detection',
     long_description=open('README.md').read(),
@@ -12,6 +12,12 @@ setup(
     author='Giorgio Micaletto',
     author_email='giorgio.micaletto@studbocconi.it',
     url='https://github.com/GiorgioMB/auto_dotmotif/',
-    install_requires=requirements,
+    install_requires=[
+        'pandas>=1.1.5',
+        'pylint>=2.6.0',
+        'numpy>=1.23',
+        'dotmotif>=0.14.0',
+        'networkx>=3.2.1'
+    ],
     python_requires='>=3.6',
 )
