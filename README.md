@@ -12,7 +12,7 @@ pip install automotifs
 from automotifs import AutoMotif
 import networkx as nx
 # Example: A random directed graph
-G = nx.gnp_random_graph(5, 0.5, directed=True)
+G = nx.gnp_random_graph(100, 0.5, directed=True)
 # Set up AutoMotif
 motif_finder = AutoMotif(Graph=G, size=3, directed=True, verbose=True)
 # Start finding motifs
