@@ -29,5 +29,7 @@ AutoMotif is made available under the MIT License. See the LICENSE file for more
 ***
 ## Who made this? 
 Giorgio Micaletto, under Professor Marta Zava's supervision at Bocconi University, put together AutoMotif. It was created to make network motif analysis less of a headache.
+
 Contacts:
-giorgio.micaletto@studbocconi.it
+- giorgio.micaletto@studbocconi.it
+- linkedin.com/in/giorgio-micaletto/
