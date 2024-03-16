@@ -175,7 +175,7 @@ class AutoMotif:
             filename = filename.replace(char, '')
         return filename[:255]  
     
-    def generate_unique_filename(self, edges, max_edges_in_name=5):
+    def generate_unique_filename(self, edges):
         """
         Generate a unique filename representing the graph's edges.
         Parameters:
@@ -184,8 +184,7 @@ class AutoMotif:
         Returns:
         - str: Unique filename.
         """
-        edge_str = ";".join(f"{source}-{target}" for source, target in edges)        
-        simplified_edges = "_".join(f"{source}to{target}" for source, target in edges[:max_edges_in_name])
+        simplified_edges = "_".join(f"{source}to{target}" for source, target in edges)
         filename = f"{simplified_edges}.csv"
         return self.sanitize_filename(filename)
 
