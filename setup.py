@@ -10,7 +10,7 @@ setup(
     long_description_content_type='text/markdown',
     author='Giorgio Micaletto',
     author_email='giorgio.micaletto@studbocconi.it',
-    url='https://github.com/GiorgioMB/stockdatafetcher/',
+    url='https://github.com/GiorgioMB/auto_dotmotif/',
     install_requires=[
         'pandas>=1.1.5',
         'yfinance>=0.1.63',
