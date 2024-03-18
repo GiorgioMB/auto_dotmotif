@@ -107,7 +107,8 @@ class AutoMotif:
                     break
             if not has_isolated_node:
                 graphs.append(matrix)
-        print("Generated", len(graphs), "graphs for", n, "nodes")
+        if self.verbose == True:
+            print("Generated", len(graphs), "graphs for", n, "nodes")
         return graphs
     
     def matrix_to_motif(self, matrix, node_labels):
@@ -146,7 +147,9 @@ class AutoMotif:
             motif_str = self.matrix_to_motif(graph, node_labels)
             if motif_str not in motifs:
                 motifs.append(motif_str)
-        print("Generated", len(motifs), "motifs for", n, "nodes")
+
+        if self.verbose == True:
+            print("Generated", len(motifs), "motifs for", n, "nodes")
         return motifs
     
     def generate_required_motifs(self):
