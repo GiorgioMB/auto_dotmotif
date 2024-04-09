@@ -22,6 +22,7 @@ from dotmotif import Motif
 from itertools import product
 import dotmotif.executors as executors
 from typing import Union
+import numpy as np
 
 class AutoMotif:
     """
@@ -37,6 +38,8 @@ class AutoMotif:
     - path (str, optional): Directory to save the motifs. Defaults to None.
     - find (bool, optional): Whether to find all motifs directly. Defaults to False.
     - verbose (bool, optional): Whether to print progress. Defaults to False.
+    - use_GrandISO (bool, optional): Whether to use GrandISO for motif detection. Defaults to False.
+    - use_Neo4j (bool, optional): Whether to use Neo4j for motif detection. Defaults to False.
     """
     def __init__(self, 
                  Graph: Union[nx.Graph, nx.DiGraph, nx.MultiGraph, nx.MultiDiGraph], 
@@ -48,7 +51,9 @@ class AutoMotif:
                  save: bool = False, 
                  path: str = None,
                  find: bool = False, 
-                 verbose: bool = False):
+                 verbose: bool = False,
+                 use_GrandISO: bool = False,
+                 use_Neo4j: bool = False):
         if not hasattr(Graph, "nodes") or not callable(getattr(Graph, "nodes")):
             raise ValueError("Graph should be a NetworkX graph")
         elif type(size) != int:
@@ -74,9 +79,15 @@ class AutoMotif:
         self.directed = directed
         self.allow_automorphism = allow_automorphism
         self.lower = lower
-        self.Ex = executors.NetworkXExecutor(graph = self.Graph)
+        if use_GrandISO == True:
+            self.Ex = executors.GrandIsoExecutor(graph = self.Graph)
+        elif use_Neo4j == True:
+            self.Ex = executors.Neo4jExecutor(graph = self.Graph)
+        else:
+            self.Ex = executors.NetworkXExecutor(graph = self.Graph)
         self.motifs = None
         self.generate_required_motifs()
+        self.motifs_found = None
         if find == True:
             self.find_all_motifs()    
     
@@ -164,7 +175,6 @@ class AutoMotif:
             motifs[self.size] = self.generate_motifs(self.size)
         self.motifs = motifs
 
-
     def sanitize_filename(self, filename):
         """
         Sanitize the filename to remove invalid characters and limit length.
@@ -191,7 +201,7 @@ class AutoMotif:
         filename = f"{simplified_edges}.csv"
         return self.sanitize_filename(filename)
 
-    def find_motifs(self, motif, size, save: bool = None):
+    def find_motifs(self, motif, size, save: bool = None, Executor = None):
         """
         Find and optionally save motifs to a CSV file.
         Parameters:
@@ -200,20 +210,26 @@ class AutoMotif:
         - save (bool): Whether to save the motifs to a file.
         """
         if self.verbose == True:
-            print("Finding motifs for", size)
+            print("Finding motifs for size", size)
         if save is None: save = self.save
         if save == True:
             dir_to_save = self.path
             os.makedirs(os.path.join(dir_to_save, f"Size_{size}"), exist_ok = True)
             raw_name = [(source, target) for source, target, *_ in motif._g.edges]
             name = self.generate_unique_filename(raw_name)
-            result = self.Ex.find(motif)
+            if Executor is not None:
+                result = Executor.find(motif)
+            else:
+                result = self.Ex.find(motif)
             result_df = pd.DataFrame(result)
             result_df.to_csv(os.path.join(dir_to_save, f"Size_{size}", f"{name}"))
             if self.verbose == True:
                 print("Saved motif to", os.path.join(dir_to_save, f"Size_{size}", f"{name}"))
         else:
-            result = self.Ex.find(motif)
+            if Executor is not None:
+                result = Executor.find(motif)
+            else:
+                result = self.Ex.find(motif)
             result_df = pd.DataFrame(result)
             return result_df
     
@@ -232,4 +248,62 @@ class AutoMotif:
                 except ValueError as e:
                     print("Failed to generate motif", motif, "due to error:", e)
         if len(final_dict) != 0:
+            self.motifs_found = final_dict
             return final_dict
+        else:
+            raise ValueError("No motifs found")
+    
+    def generate_random_graphs(self, num_nodes: int, num_graphs: int, seed: int = None):
+        if self.verbose == True:
+            print("Generating random graphs")
+        graphs = []
+        if seed is not None:
+            np.random.seed(seed)
+        for i in range(num_graphs):
+            if i % (num_graphs // 10) == 0 and self.verbose == True:
+                print(f"Generated {i} random graphs out of {num_graphs}")
+            p = np.random.rand()
+            graph = nx.fast_gnp_random_graph(num_nodes, p, directed = self.directed, seed = seed)
+            graph.remove_edges_from(nx.selfloop_edges(graph))
+            graphs.append(graph)
+        return graphs
+
+    def calculate_zscore(self, num_random_graphs: int = 100, Executor = executors.GrandIsoExecutor ,seed: int = None):
+        if self.verbose == True:
+            print("Calculating Z-Scores")
+        num_nodes = len(self.Graph.nodes)
+        graphs = self.generate_random_graphs(num_nodes, num_random_graphs, seed)
+        if self.verbose == True:
+            print("Generated random graphs")
+        actual_motifs = self.find_all_motifs() if self.motifs_found is None else self.motifs_found
+        actual_motif_counts = {motif: len(df) for motif, df in actual_motifs.items()}
+        random_motif_counts = {motif: [] for motif in actual_motifs.keys()}
+        if self.verbose == True:
+            print("Finding motifs in random graphs")
+        for graph in graphs:
+            for motif in actual_motifs.keys():
+                try:
+                    executor = Executor(graph = graph)
+                    result = self.find_motifs(motif, len(motif._g.nodes), save = False, Executor = executor)
+                    random_motif_counts[motif].append(len(result))
+                except ValueError as e:
+                    print("Failed to generate motif", motif, "due to error:", e)
+        if self.verbose == True:
+            print("Calculating Z-Scores")
+        motif_zscores = {}
+        for motif, counts in random_motif_counts.items():
+            actual_count = actual_motif_counts[motif]
+            mean = np.mean(counts)
+            std = np.std(counts)
+            zscore = (actual_count - mean) / std
+            motif_zscores[motif] = zscore
+        if self.verbose == True:
+            print("Z-Scores calculated")
+        if self.save:
+            if self.verbose == True:
+                print("Saving Z-Scores")
+            dir_to_save = self.path
+            os.makedirs(os.path.join(dir_to_save, "ZScores"), exist_ok = True)
+            zscore_df = pd.DataFrame(motif_zscores.items(), columns = ["Motif", "ZScore"])
+            zscore_df.to_csv(os.path.join(dir_to_save, "ZScores", "ZScores.csv"))
+        return motif_zscores
