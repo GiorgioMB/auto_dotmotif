@@ -39,7 +39,6 @@ class AutoMotif:
     - find (bool, optional): Whether to find all motifs directly. Defaults to False.
     - verbose (bool, optional): Whether to print progress. Defaults to False.
     - use_GrandISO (bool, optional): Whether to use GrandISO for motif detection. Defaults to False.
-    - use_Neo4j (bool, optional): Whether to use Neo4j for motif detection. Defaults to False.
     """
     def __init__(self, 
                  Graph: Union[nx.Graph, nx.DiGraph, nx.MultiGraph, nx.MultiDiGraph], 
@@ -52,8 +51,7 @@ class AutoMotif:
                  path: str = None,
                  find: bool = False, 
                  verbose: bool = False,
-                 use_GrandISO: bool = False,
-                 use_Neo4j: bool = False):
+                 use_GrandISO: bool = False):
         if not hasattr(Graph, "nodes") or not callable(getattr(Graph, "nodes")):
             raise ValueError("Graph should be a NetworkX graph")
         elif type(size) != int:
@@ -81,8 +79,6 @@ class AutoMotif:
         self.lower = lower
         if use_GrandISO == True:
             self.Ex = executors.GrandIsoExecutor(graph = self.Graph)
-        elif use_Neo4j == True:
-            self.Ex = executors.Neo4jExecutor(graph = self.Graph)
         else:
             self.Ex = executors.NetworkXExecutor(graph = self.Graph)
         self.motifs = None
