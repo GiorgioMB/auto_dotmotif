@@ -15,7 +15,7 @@ import networkx as nx
 # Example: A random directed graph
 G = nx.gnp_random_graph(100, 0.5, directed=True)
 # Set up AutoMotif
-motif_finder = AutoMotif(Graph=G, size=3, directed=True, verbose=True, use_GrandISO = True)
+motif_finder = AutoMotif(Graph=G, size=3, directed=True, verbose=True, use_GrandISO=True)
 # Start finding motifs
 motifs = motif_finder.find_all_motifs()
 # Calculate the Z-Score for the motifs
