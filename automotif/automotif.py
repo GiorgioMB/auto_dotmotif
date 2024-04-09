@@ -27,7 +27,7 @@ import numpy as np
 class AutoMotif:
     """
     Wrapper class for dotmotif to find all possible motifs in a graph automatically.
-    Parameters:
+    Inputs:
     - Graph (networkx.Graph): The graph to analyze.
     - size (int): Size of the motif to find.
     - directed (bool, optional): Whether the graph is directed. Defaults to False.
@@ -87,14 +87,12 @@ class AutoMotif:
         if find == True:
             self.find_all_motifs()    
     
-    def generate_graphs(self, n):
+    def generate_graphs(self, n: int) -> list:
         """
         Generate all possible directed graphs for n nodes, ignoring self-loops,
         and ensure no isolated nodes are present. Each graph is represented by its adjacency matrix.
-        Parameters:
+        Inputs:
         - n (int): Number of nodes.
-        Returns:
-        - list: List of adjacency matrices representing all possible graphs.
         """
         if self.verbose == True:
             print("Generating graphs for", n, "nodes")
@@ -118,14 +116,12 @@ class AutoMotif:
             print("Generated", len(graphs), "graphs for", n, "nodes")
         return graphs
     
-    def matrix_to_motif(self, matrix, node_labels):
+    def matrix_to_motif(self, matrix: list, node_labels: list) -> Motif:
         """
         Convert an adjacency matrix to the specified motif format.
-        Parameters:
+        Inputs:
         - matrix (list): Adjacency matrix.
         - node_labels (list): List of node labels.
-        Returns:
-        - Motif: Motif object.
         """
         motif_str = ""
         for i, row in enumerate(matrix):
@@ -137,13 +133,11 @@ class AutoMotif:
         motif_obj = Motif(input_motif=motif_str, enforce_inequality = True, exclude_automorphisms = remove_automorphisms, ignore_direction = ignore_direct)
         return motif_obj
     
-    def generate_motifs(self, n):
+    def generate_motifs(self, n: int) -> list:
         """
         Generate all unique motifs of n nodes and convert them to the desired format.
-        Parameters:
-        - n (int): Number of nodes.
-        Returns:
-        - list: List of motifs.
+        Inputs:
+        - n (int): Number of nodes in the motif.
         """
         if self.verbose == True:
             print("Generating motifs for", n, "nodes")
@@ -171,39 +165,35 @@ class AutoMotif:
             motifs[self.size] = self.generate_motifs(self.size)
         self.motifs = motifs
 
-    def sanitize_filename(self, filename):
+    def sanitize_filename(self, filename: str) -> str:
         """
-        Sanitize the filename to remove invalid characters and limit length.
-        Parameters:
-        - filename (str): The filename to sanitize.
-        Returns:
-        - str: Sanitized filename.
+        Sanitize the filename by removing invalid characters and truncating it to 255 characters to prevent OS errors.
+        Inputs:
+        - filename (str): Filename to sanitize.
         """
         invalid_chars = '<>:"/\\|?*'
         for char in invalid_chars:
             filename = filename.replace(char, '')
         return filename[:255]  
     
-    def generate_unique_filename(self, edges):
+    def generate_unique_filename(self, edges: dict) -> str:
         """
-        Generate a unique filename representing the graph's edges.
-        Parameters:
-        - edges (list): List of edges in the graph.
-        - max_edges_in_name (int, optional): Maximum number of edges to include in the name. Defaults to 5.
-        Returns:
-        - str: Unique filename.
+        Generates an unique filename based on the edges of the motif.
+        Inputs:
+        - edges (list): List of edges in the motif.
         """
         simplified_edges = "_".join(f"{source}to{target}" for source, target in edges)
         filename = f"{simplified_edges}.csv"
         return self.sanitize_filename(filename)
 
-    def find_motifs(self, motif, size, save: bool = None, Executor = None):
+    def find_motifs(self, motif, size, save: bool = None, Executor: executors.Executor = None) -> pd.DataFrame:
         """
-        Find and optionally save motifs to a CSV file.
-        Parameters:
-        - motif (Motif): The motif to find.
+        Search for the specified motif in the graph and optionally save the results to a CSV file.
+        Inputs:
+        - motif (dotmotif.Motif): Motif to find.
         - size (int): Size of the motif.
-        - save (bool): Whether to save the motifs to a file.
+        - save (bool): Whether to save the motif to a CSV file. Defaults to None.
+        - Executor (dotmotif.executors.Executor): Executor to use for motif detection. Defaults to None.
         """
         if self.verbose == True:
             print("Finding motifs for size", size)
@@ -229,7 +219,7 @@ class AutoMotif:
             result_df = pd.DataFrame(result)
             return result_df
     
-    def find_all_motifs(self):
+    def find_all_motifs(self) -> dict:
         """Find all motifs based on the class parameters and optionally save them to files."""
         if self.verbose == True:
             print("Finding all motifs")
@@ -249,7 +239,15 @@ class AutoMotif:
         else:
             raise ValueError("No motifs found")
     
-    def generate_random_graphs(self, num_nodes: int, num_graphs: int, seed: int = None):
+    def generate_random_graphs(self, num_nodes: int, num_graphs: int, seed: int = None) -> list:
+        """
+        Generate random graphs for Z-Score calculation, with the probability of an edge being present
+        determined by a random value between 0 and 1.
+        Inputs:
+        - num_nodes (int): Number of nodes in the graph.
+        - num_graphs (int): Number of random graphs to generate.
+        - seed (int): Seed for random number generation for reproducibility. Defaults to None.
+        """
         if self.verbose == True:
             print("Generating random graphs")
         graphs = []
@@ -264,7 +262,17 @@ class AutoMotif:
             graphs.append(graph)
         return graphs
 
-    def calculate_zscore(self, num_random_graphs: int = 100, Executor = executors.GrandIsoExecutor ,seed: int = None):
+    def calculate_zscore(self, num_random_graphs: int = 100, Executor: executors.Executor = executors.GrandIsoExecutor ,seed: int = None) -> dict:
+        """
+        Method to calculate the Z-Scores for each motif based on the number of motifs found in random graphs.
+        Inputs:
+        - num_random_graphs (int): Number of random graphs to generate. Defaults to 100.
+        - Executor (dotmotif.executors.Executor): Executor to use for motif detection. Defaults to GrandIsoExecutor.
+        - seed (int): Seed for random number generation. Defaults to None.
+        Returns:
+        - dict: Dictionary containing the Z-Scores for each motif.
+        - Saves the Z-Scores to a CSV file if save is set to True.
+        """
         if self.verbose == True:
             print("Calculating Z-Scores")
         num_nodes = len(self.Graph.nodes)
