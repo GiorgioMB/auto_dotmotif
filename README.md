@@ -1,6 +1,6 @@
 # AutoMotif: Automated Motif Detection in Network Graphs
 ## What is it?
-AutoMotif helps you find patterns, called motifs, in network graphs. It uses NetworkX for working with graphs, dotmotif for finding the patterns, and pandas for handling data. Whether your graphs are directed or not, AutoMotif can search for motifs based on the criteria you set, like motif size and whether to consider pattern repetitions (automorphisms).
+AutoMotif streamlines the identification and cataloging of motifs within network graphs. Utilizing NetworkX for graph manipulation, dotmotif for detecting motifs, and pandas for data management, it simplifies the process of uncovering patterns across both directed and undirected networks. Users can customize searches based on motif size, directionality, and the treatment of automorphisms, and even save results for further analysis.
 
 ## Installation
 
