@@ -15,6 +15,7 @@ defining what constitutes a motif through its parameters.
 Developed by Giorgio Micaletto under the supervision of Professor Marta Zava at Bocconi University,
 this tool aims to facilitate the systematic study of network motifs.
 """
+import random
 import pandas as pd 
 import networkx as nx
 import os
@@ -23,6 +24,8 @@ from itertools import product
 import dotmotif.executors as executors
 from typing import Union
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 class AutoMotif:
     """
@@ -39,6 +42,7 @@ class AutoMotif:
     - find (bool, optional): Whether to find all motifs directly. Defaults to False.
     - verbose (bool, optional): Whether to print progress. Defaults to False.
     - use_GrandISO (bool, optional): Whether to use GrandISO for motif detection. Defaults to False.
+    - personal_executor (dotmotif.executors.Executor, optional): Executor to use for motif detection. Defaults to None.
     """
     def __init__(self, 
                  Graph: Union[nx.Graph, nx.DiGraph, nx.MultiGraph, nx.MultiDiGraph], 
@@ -51,7 +55,8 @@ class AutoMotif:
                  path: str = None,
                  find: bool = False, 
                  verbose: bool = False,
-                 use_GrandISO: bool = False):
+                 use_GrandISO: bool = False,
+                 personal_executor: executors.Executor = None):
         if not hasattr(Graph, "nodes") or not callable(getattr(Graph, "nodes")):
             raise ValueError("Graph should be a NetworkX graph")
         elif type(size) != int:
@@ -77,8 +82,12 @@ class AutoMotif:
         self.directed = directed
         self.allow_automorphism = allow_automorphism
         self.lower = lower
+        if personal_executor is not None:
+            self.Ex = personal_executor
         if use_GrandISO == True:
             self.Ex = executors.GrandIsoExecutor(graph = self.Graph)
+            if personal_executor is not None:
+                print("Warning: The Executor provided will be ignored in favor of GrandIsoExecutor as use_GrandISO is set to True")
         else:
             self.Ex = executors.NetworkXExecutor(graph = self.Graph)
         self.motifs = None
@@ -254,19 +263,23 @@ class AutoMotif:
         if seed is not None:
             np.random.seed(seed)
         for i in range(num_graphs):
-            if i % (num_graphs // 10) == 0 and self.verbose == True:
-                print(f"Generated {i} random graphs out of {num_graphs}")
+            if self.verbose:
+                if num_graphs > 10 and i % (num_graphs // 10) == 0 and i != 0:
+                    print(f"Generated {i + 1} random graphs out of {num_graphs}")
+                elif num_graphs <= 10:
+                    print(f"Generated {i + 1} random graphs out of {num_graphs}")
             p = np.random.rand()
             graph = nx.fast_gnp_random_graph(num_nodes, p, directed = self.directed, seed = seed)
             graph.remove_edges_from(nx.selfloop_edges(graph))
             graphs.append(graph)
         return graphs
 
-    def calculate_zscore(self, num_random_graphs: int = 100, Executor: executors.Executor = executors.GrandIsoExecutor ,seed: int = None) -> dict:
+    def calculate_zscore(self, num_random_graphs: int = 100, display = False, Executor: executors.Executor = executors.GrandIsoExecutor, seed: int = None) -> dict:
         """
         Method to calculate the Z-Scores for each motif based on the number of motifs found in random graphs.
         Inputs:
         - num_random_graphs (int): Number of random graphs to generate. Defaults to 100.
+        - display (bool): Whether to display the motifs. Defaults to False.
         - Executor (dotmotif.executors.Executor): Executor to use for motif detection. Defaults to GrandIsoExecutor.
         - seed (int): Seed for random number generation. Defaults to None.
         Returns:
@@ -294,6 +307,33 @@ class AutoMotif:
                     print("Failed to generate motif", motif, "due to error:", e)
         if self.verbose == True:
             print("Calculating Z-Scores")
+        if display:
+            for motif in actual_motifs.keys():
+                actual = actual_motif_counts[motif]
+                random = random_motif_counts[motif]
+                graph_types = ['Actual'] + ['Random'] * len(random)
+                graph_numbers = ['Actual'] + ['Random {}'.format(i+1) for i in range(len(random))]
+                motif_counts = [actual] + random
+                df = pd.DataFrame({
+                    'Graph Type': graph_types,
+                    'Graph Number': graph_numbers,
+                    'Motif Count': motif_counts
+                })
+                plt.figure(figsize=(10, 6))
+                sns.barplot(x='Graph Number', y='Motif Count', hue='Graph Type', data=df, palette={'Actual': 'blue', 'Random': 'orange'}, dodge=False)
+                plt.xlabel('Graphs')
+                plt.ylabel('Motif Counts')
+                plt.title('Motif Counts in Actual vs. Random Graphs')
+                plt.xticks(rotation=45)  
+                plt.legend(title='Graph Type')
+                plt.tight_layout()
+                if self.save:
+                    dir_to_save = self.path
+                    raw_name = [(source, target) for source, target, *_ in motif._g.edges]
+                    name = self.generate_unique_filename(raw_name).split(".")[0]
+                    os.makedirs(os.path.join(dir_to_save, "ZScores"), exist_ok = True)
+                    plt.savefig(os.path.join(dir_to_save, "ZScores", f"Motif_{name}.png"))
+                plt.show()
         motif_zscores = {}
         for motif, counts in random_motif_counts.items():
             actual_count = actual_motif_counts[motif]
@@ -311,3 +351,19 @@ class AutoMotif:
             zscore_df = pd.DataFrame(motif_zscores.items(), columns = ["Motif", "ZScore"])
             zscore_df.to_csv(os.path.join(dir_to_save, "ZScores", "ZScores.csv"))
         return motif_zscores
+    
+    def display_motif(self, motif: Motif) -> None:
+        """
+        Display the motif as a graph.
+        Inputs:
+        - motif (dotmotif.Motif): Motif to display.
+        """
+        Graph = motif.to_nx()
+        nx.draw(Graph, with_labels = True)
+    
+    def display_all_motifs(self) -> None:
+        """Display all motifs found in the graph."""
+        if self.motifs_found is None:
+            self.find_all_motifs()
+        for motif in self.motifs_found.keys():
+            self.display_motif(motif)
