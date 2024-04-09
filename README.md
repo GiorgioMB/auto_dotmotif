@@ -38,4 +38,4 @@ AutoMotif is made available under the MIT License. See the LICENSE file for more
 AutoMotif was developed by Giorgio Micaletto under the guidance of Professor Marta Zava at Bocconi University. This tool is designed to simplify and facilitate the complex process of network motif analysis.
 Contacts:
 - giorgio.micaletto@studbocconi.it
-- [linkedin](linkedin.com/in/giorgio-micaletto/)
+- [LinkedIn](linkedin.com/in/giorgio-micaletto/)
