@@ -3,7 +3,6 @@ import unittest
 import networkx as nx
 from automotif import AutoMotif
 class TestAutoMotif(unittest.TestCase):
-
     def setUp(self):
         self.graph = nx.DiGraph()
         self.graph.add_edges_from([(1, 2), (2, 3), (3, 1)])
