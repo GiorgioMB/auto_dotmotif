@@ -18,6 +18,7 @@ this tool aims to facilitate the systematic study of network motifs.
 import random
 import pandas as pd 
 import networkx as nx
+from .Neo4j import Neo4jExecutor
 import os
 from dotmotif import Motif
 from itertools import product
@@ -56,6 +57,7 @@ class AutoMotif:
                  find: bool = False, 
                  verbose: bool = False,
                  use_GrandISO: bool = False,
+                 use_Neo4j: bool = False,
                  personal_executor: executors.Executor = None):
         if not hasattr(Graph, "nodes") or not callable(getattr(Graph, "nodes")):
             raise ValueError("Graph should be a NetworkX graph")
@@ -88,6 +90,10 @@ class AutoMotif:
             self.Ex = executors.GrandIsoExecutor(graph = self.Graph)
             if personal_executor is not None:
                 print("Warning: The Executor provided will be ignored in favor of GrandIsoExecutor as use_GrandISO is set to True")
+        elif use_Neo4j == True:
+            self.Ex = Neo4jExecutor(graph = self.Graph)
+            if personal_executor is not None:
+                print("Warning: The Executor provided will be ignored in favor of Neo4jExecutor as use_Neo4j is set to True")
         else:
             self.Ex = executors.NetworkXExecutor(graph = self.Graph)
         self.motifs = None
