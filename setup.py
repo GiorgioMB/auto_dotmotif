@@ -15,7 +15,9 @@ setup(
         'pylint>=2.6.0',
         'numpy>=1.23',
         'dotmotif>=0.14.0',
-        'networkx>=3.2.1'
+        'networkx>=3.2.1',
+        'tamarind>=0.2.1',
+        'py2neo>=2021.2.4',
     ],
     python_requires='>=3.6',
 )
