@@ -92,6 +92,7 @@ class AutoMotif:
             if personal_executor is not None:
                 print("Warning: The Executor provided will be ignored in favor of GrandIsoExecutor as use_GrandISO is set to True")
         if use_GPU:
+            os.environ['NETWORKX_AUTOMATIC_BACKENDS'] = 'cugraph'
             self.Ex = AcceleratedExecutor (graph = self.Graph)
             if personal_executor is not None or use_GrandISO == True:
                 print("Warning: GPU Accelerator Executor will be used, ignoring other executors provided, as use_GPU is set to True")
