@@ -1,5 +1,14 @@
-"""This module sets up the package for distribution."""
+import os
 from setuptools import setup, find_packages
+from setuptools.command.install import install
+
+class PostInstallCommand(install):
+    """Post-installation for installation mode."""
+    def run(self):
+        install.run(self)
+        # Running pip install for nx-cugraph with the specified extra index URL
+        os.system("pip install nx-cugraph-cu11 --extra-index-url https://pypi.nvidia.com")
+
 setup(
     name='automotifs',
     version='1.3',
@@ -20,4 +29,7 @@ setup(
         'py2neo>=2021.2.4',
     ],
     python_requires='>=3.6',
+    cmdclass={
+        'install': PostInstallCommand,
+    }
 )
