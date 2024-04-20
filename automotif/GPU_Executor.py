@@ -17,7 +17,6 @@ import copy
 import networkx as nx
 from dotmotif.executors import Executor
 import os
-os.environ['NETWORKX_AUTOMATIC_BACKENDS'] = 'cugraph'
 
 
 if TYPE_CHECKING:
