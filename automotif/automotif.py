@@ -26,6 +26,7 @@ from typing import Union
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from .GPU_Executor import AcceleratedExecutor
 
 class AutoMotif:
     """
@@ -42,6 +43,7 @@ class AutoMotif:
     - find (bool, optional): Whether to find all motifs directly. Defaults to False.
     - verbose (bool, optional): Whether to print progress. Defaults to False.
     - use_GrandISO (bool, optional): Whether to use GrandISO for motif detection. Defaults to False.
+    - use_GPU (bool, optional): Whether to use the GPU accelerated executor for motif detection. Defaults to False
     - personal_executor (dotmotif.executors.Executor, optional): Executor to use for motif detection. Defaults to None.
     """
     def __init__(self, 
@@ -56,6 +58,7 @@ class AutoMotif:
                  find: bool = False, 
                  verbose: bool = False,
                  use_GrandISO: bool = False,
+                 use_GPU: bool = False
                  personal_executor: executors.Executor = None):
         if not hasattr(Graph, "nodes") or not callable(getattr(Graph, "nodes")):
             raise ValueError("Graph should be a NetworkX graph")
@@ -84,17 +87,21 @@ class AutoMotif:
         self.lower = lower
         if personal_executor is not None:
             self.Ex = personal_executor
-        if use_GrandISO == True:
+        if use_GrandISO:
             self.Ex = executors.GrandIsoExecutor(graph = self.Graph)
             if personal_executor is not None:
                 print("Warning: The Executor provided will be ignored in favor of GrandIsoExecutor as use_GrandISO is set to True")
+        if use_GPU:
+            self.Ex = AcceleratedExecutor (graph = self.Graph)
+            if personal_executor is not None or use_GrandISO == True:
+                print("Warning: GPU Accelerator Executor will be used, ignoring other executors provided, as use_GPU is set to True")
         else:
             self.Ex = executors.NetworkXExecutor(graph = self.Graph)
         self.motifs = None
         self.generate_required_motifs()
         self.motifs_found = None
-        if find == True:
-            self.find_all_motifs()    
+        if find:
+            return self.find_all_motifs()    
     
     def generate_graphs(self, n: int) -> list:
         """
