@@ -1,9 +1,19 @@
 # AutoMotif: Automated Motif Detection in Network Graphs
 ## What is it?
-<p align="left">
-  <img src="Dotmotif-Logo.png" width="100" alt="AutoMotif Logo" style="vertical-align: middle;">
-  <span style="font-size: 106px; vertical-align: middle;"><b>AutoMotif</b></span><br>
-</p>
+<table>
+  <tr>
+    <!-- Image cell -->
+    <td>
+      <img src="Dotmotif-Logo.png" width="100" alt="AutoMotif Logo">
+    </td>
+    
+    <!-- Text cell -->
+    <td style="vertical-align: middle;">
+      <span style="font-size: 36px;"><b>AutoMotif</b></span><br>
+      <span style="font-size: 24px;">Automatic Motif Detection</span>
+    </td>
+  </tr>
+</table>
 AutoMotif streamlines the identification and cataloging of motifs within network graphs. Utilizing NetworkX for graph manipulation, dotmotif for detecting motifs, and pandas for data management, it simplifies the process of uncovering patterns across both directed and undirected networks. Users can customize searches based on motif size, directionality, executors and the treatment of automorphisms, as well as even having the option to save the results for further analysis.
 
 
