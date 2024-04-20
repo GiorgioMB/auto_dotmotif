@@ -2,7 +2,7 @@
 from setuptools import setup, find_packages
 setup(
     name='automotifs',
-    version='1.2',
+    version='1.3',
     packages=find_packages(),
     description='A wrapper for automatic Motif Detection',
     long_description=open('README.md').read(),
