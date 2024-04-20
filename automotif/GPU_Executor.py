@@ -1,15 +1,15 @@
 """
 This Python module defines an 'AcceleratedExecutor' class for efficient graph motif querying using NetworkX. The executor utilizes various internal functions to validate nodes and edges against specified constraints, supporting both simple and multigraph structures. It includes methods for counting and finding motifs in larger graphs, incorporating both static and dynamic constraints.
 
-Copyright 2022 The Johns Hopkins University Applied Physics Laboratory.
+Developed by Giorgio Micaletto under the supervision of Professor Marta Zava at Bocconi University, this tool aims to facilitate the systematic study of network motifs.
+
+Original code and concept courtesy of The Johns Hopkins University Applied Physics Laboratory, released under the Apache License, Version 2.0.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at:
 
     http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
-
-NOTE: This document includes a new executor implementation.
 """
 
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
