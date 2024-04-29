@@ -24,7 +24,8 @@ setup(
         'pylint>=2.6.0',
         'numpy>=1.23',
         'dotmotif>=0.14.0',
-        'networkx>=3.2.1'
+        'networkx>=3.2.1',
+        'matplotlib>=3.8.0'
     ],
     python_requires='>=3.6',
     cmdclass={
