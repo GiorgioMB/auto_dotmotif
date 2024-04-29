@@ -11,7 +11,7 @@ class PostInstallCommand(install):
 
 setup(
     name='automotifs',
-    version='1.4.4', 
+    version='1.5', 
     packages=find_packages(),
     description='A wrapper for automatic Motif Detection',
     long_description=open('README.md').read(),
