@@ -106,31 +106,49 @@ class AutoMotif:
     
     def generate_graphs(self, n: int) -> list:
         """
-        Generate all possible directed graphs for n nodes, ignoring self-loops,
-        and ensure no isolated nodes are present. Each graph is represented by its adjacency matrix.
+        Generate all possible graphs for n nodes, ignoring self-loops.
+        If self.directed is False, generate directed graphs ensuring no isolated nodes.
+        If self.directed is True, generate undirected graphs with symmetric adjacency matrices.
+        Each graph is represented by its adjacency matrix.
         Inputs:
         - n (int): Number of nodes.
         """
-        if self.verbose == True:
-            print("Generating graphs for", n, "nodes")
+        if self.verbose:
+            print("Generating motifs for", n, "nodes")
         graphs = []
-        for edges in product([0, 1], repeat=n*(n-1)):
-            matrix = [[0 for _ in range(n)] for _ in range(n)]
-            edge_index = 0
-            for i in range(n):
-                for j in range(n):
-                    if i != j:  
-                        matrix[i][j] = edges[edge_index]
+        if not self.directed:
+            for edges in product([0, 1], repeat=int(n*(n-1)/2)):
+                matrix = [[0 for _ in range(n)] for _ in range(n)]
+                edge_index = 0
+                for i in range(n):
+                    for j in range(i+1, n):
+                        matrix[i][j] = matrix[j][i] = edges[edge_index]
                         edge_index += 1
-            has_isolated_node = False
-            for i in range(n):
-                if all(matrix[i][j] == 0 for j in range(n)) or all(matrix[j][i] == 0 for j in range(n)):
-                    has_isolated_node = True
-                    break
-            if not has_isolated_node:
-                graphs.append(matrix)
-        if self.verbose == True:
-            print("Generated", len(graphs), "graphs for", n, "nodes")
+                has_isolated_node = False
+                for i in range(n):
+                    if all(matrix[i][j] == 0 for j in range(n)):
+                        has_isolated_node = True
+                        break
+                if not has_isolated_node:
+                    graphs.append(matrix)
+        else:
+            for edges in product([0, 1], repeat=n*(n-1)):
+                matrix = [[0 for _ in range(n)] for _ in range(n)]
+                edge_index = 0
+                for i in range(n):
+                    for j in range(n):
+                        if i != j:
+                            matrix[i][j] = edges[edge_index]
+                            edge_index += 1
+                has_isolated_node = False
+                for i in range(n):
+                    if all(matrix[i][j] == 0 for j in range(n)) or all(matrix[j][i] == 0 for j in range(n)):
+                        has_isolated_node = True
+                        break
+                if not has_isolated_node:
+                    graphs.append(matrix)
+        if self.verbose:
+            print("Generated", len(graphs), "motifs for", n, "nodes")
         return graphs
     
     def matrix_to_motif(self, matrix: list, node_labels: list) -> Motif:
