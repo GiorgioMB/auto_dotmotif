@@ -25,7 +25,8 @@ setup(
         'numpy>=1.23',
         'dotmotif>=0.14.0',
         'networkx>=3.2.1',
-        'matplotlib>=3.8.0'
+        'matplotlib>=3.8.0',
+        'seaborn>=0.12.2'
     ],
     python_requires='>=3.6',
     cmdclass={
