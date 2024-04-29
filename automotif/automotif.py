@@ -58,7 +58,7 @@ class AutoMotif:
                  find: bool = False, 
                  verbose: bool = False,
                  use_GrandISO: bool = False,
-                 use_GPU: bool = False
+                 use_GPU: bool = False,
                  personal_executor: executors.Executor = None):
         if not hasattr(Graph, "nodes") or not callable(getattr(Graph, "nodes")):
             raise ValueError("Graph should be a NetworkX graph")
