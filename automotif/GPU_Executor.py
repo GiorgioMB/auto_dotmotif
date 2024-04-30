@@ -1,7 +1,5 @@
 """
-This Python module defines an 'AcceleratedExecutor' class for efficient graph motif querying using NetworkX. 
-The executor utilizes various internal functions to validate nodes and edges against specified constraints, supporting both simple and multigraph structures. 
-It includes methods for counting and finding motifs in larger graphs, incorporating both static and dynamic constraints.
+This Python module defines an 'AcceleratedExecutor' class for efficient graph motif querying using GrandISO. 
 Developed by Giorgio Micaletto under the supervision of Professor Marta Zava at Bocconi University, this tool aims to facilitate the systematic study of network motifs.
 
 Original code and concept courtesy of The Johns Hopkins University Applied Physics Laboratory, released under the Apache License, Version 2.0.
