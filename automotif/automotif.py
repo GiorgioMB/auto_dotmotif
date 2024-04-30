@@ -165,7 +165,7 @@ class AutoMotif:
                     motif_str += f"{node_labels[i]} -> {node_labels[j]}\n"
         remove_automorphisms = not self.allow_automorphism
         ignore_direct = not self.directed
-        motif_obj = Motif(input_motif=motif_str, enforce_inequality = True, exclude_automorphisms = remove_automorphisms, ignore_direction = ignore_direct)
+        motif_obj = Motif(input_motif = motif_str, enforce_inequality = True, exclude_automorphisms = remove_automorphisms, ignore_direction = ignore_direct)
         return motif_obj
     
     def generate_motifs(self, n: int) -> list:
@@ -175,7 +175,7 @@ class AutoMotif:
         - n (int): Number of nodes in the motif.
         """
         if self.verbose == True:
-            print("Generating motifs for", n, "nodes")
+            print("Generating DotMotif motif object for", n, "nodes")
         motifs = []
         graphs = self.generate_graphs(n)
         node_labels = [chr(ord('A') + i) for i in range(n)]
@@ -183,7 +183,6 @@ class AutoMotif:
             motif_str = self.matrix_to_motif(graph, node_labels)
             if motif_str not in motifs:
                 motifs.append(motif_str)
-
         if self.verbose == True:
             print("Generated", len(motifs), "motifs for", n, "nodes")
         return motifs
@@ -221,7 +220,7 @@ class AutoMotif:
         filename = f"{simplified_edges}.csv"
         return self.sanitize_filename(filename)
 
-    def find_motifs(self, motif, size, save: bool = None, Executor: executors.Executor = None) -> pd.DataFrame:
+    def find_motif(self, motif, size, save: bool = None, Executor: executors.Executor = None) -> pd.DataFrame:
         """
         Search for the specified motif in the graph and optionally save the results to a CSV file.
         Inputs:
@@ -264,7 +263,7 @@ class AutoMotif:
                 print("Finding motifs for size", size)
             for motif in motifs:
                 try:
-                    ret_df = self.find_motifs(motif, size)
+                    ret_df = self.find_motif(motif, size)
                     final_dict[motif] = ret_df
                 except ValueError as e:
                     print("Failed to generate motif", motif, "due to error:", e)
@@ -327,7 +326,7 @@ class AutoMotif:
             for motif in actual_motifs.keys():
                 try:
                     executor = Executor(graph = graph)
-                    result = self.find_motifs(motif, len(motif._g.nodes), save = False, Executor = executor)
+                    result = self.find_motif(motif, len(motif._g.nodes), save = False, Executor = executor)
                     random_motif_counts[motif].append(len(result))
                 except ValueError as e:
                     print("Failed to generate motif", motif, "due to error:", e)
