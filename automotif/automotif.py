@@ -229,8 +229,6 @@ class AutoMotif:
         - save (bool): Whether to save the motif to a CSV file. Defaults to None.
         - Executor (dotmotif.executors.Executor): Executor to use for motif detection. Defaults to None.
         """
-        if self.verbose == True:
-            print("Finding motifs for size", size)
         if save is None: save = self.save
         if save == True:
             dir_to_save = self.path
