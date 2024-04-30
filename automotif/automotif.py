@@ -59,7 +59,8 @@ class AutoMotif:
                  verbose: bool = False,
                  use_GrandISO: bool = False,
                  use_GPU: bool = False,
-                 personal_executor: executors.Executor = None):
+                 personal_executor: executors.Executor = None,
+                 random_seed: int = None):
         if not hasattr(Graph, "nodes") or not callable(getattr(Graph, "nodes")):
             raise ValueError("Graph should be a NetworkX graph")
         elif type(size) != int:
@@ -76,6 +77,9 @@ class AutoMotif:
             print(f"Warning: Upto is set to True, this will generate motifs from size {lower} to {size}")
         elif save and path == None:
             raise ValueError("Path should be provided if save is set to True")
+        elif random_seed is not None:
+            random.seed(random_seed)
+            np.random.seed(random_seed)
         self.Graph = Graph
         self.size = size
         self.upto = upto
@@ -93,7 +97,7 @@ class AutoMotif:
                 print("Warning: The Executor provided will be ignored in favor of GrandIsoExecutor as use_GrandISO is set to True")
         if use_GPU:
             os.environ['NETWORKX_AUTOMATIC_BACKENDS'] = 'cugraph'
-            self.Ex = AcceleratedExecutor (graph = self.Graph)
+            self.Ex = AcceleratedExecutor(graph = self.Graph)
             if personal_executor is not None or use_GrandISO == True:
                 print("Warning: GPU Accelerator Executor will be used, ignoring other executors provided, as use_GPU is set to True")
         else:
@@ -220,7 +224,11 @@ class AutoMotif:
         filename = f"{simplified_edges}.csv"
         return self.sanitize_filename(filename)
 
-    def find_motif(self, motif, size, save: bool = None, Executor: executors.Executor = None) -> pd.DataFrame:
+    def find_motif(self, 
+                   motif, 
+                   size, 
+                   save: bool = None, 
+                   Executor: executors.Executor = None) -> pd.DataFrame:
         """
         Search for the specified motif in the graph and optionally save the results to a CSV file.
         Inputs:
@@ -271,7 +279,10 @@ class AutoMotif:
         else:
             raise ValueError("No motifs found")
     
-    def generate_random_graphs(self, num_nodes: int, num_graphs: int, seed: int = None) -> list:
+    def generate_random_graphs(self, 
+                               num_nodes: int, 
+                               num_graphs: int, 
+                               seed: int = None) -> list:
         """
         Generate random graphs for Z-Score calculation, with the probability of an edge being present
         determined by a random value between 0 and 1.
@@ -297,7 +308,11 @@ class AutoMotif:
             graphs.append(graph)
         return graphs
 
-    def calculate_zscore(self, num_random_graphs: int = 100, display = False, Executor: executors.Executor = executors.GrandIsoExecutor, seed: int = None) -> dict:
+    def calculate_zscore(self, 
+                         num_random_graphs: int = 100, 
+                         display = False, 
+                         Executor: executors.Executor = None, 
+                         seed: int = None) -> dict:
         """
         Method to calculate the Z-Scores for each motif based on the number of motifs found in random graphs.
         Inputs:
@@ -311,6 +326,10 @@ class AutoMotif:
         """
         if self.verbose == True:
             print("Calculating Z-Scores")
+        if self.use_GPU and isinstance(Executor, None):
+            Executor = AcceleratedExecutor
+        elif isinstance(Executor, None):
+            Executor = executors.GrandIsoExecutor
         num_nodes = len(self.Graph.nodes)
         graphs = self.generate_random_graphs(num_nodes, num_random_graphs, seed)
         if self.verbose == True:
@@ -375,7 +394,8 @@ class AutoMotif:
             zscore_df.to_csv(os.path.join(dir_to_save, "ZScores", "ZScores.csv"))
         return motif_zscores
     
-    def display_motif(self, motif: Motif) -> None:
+    def display_motif(self, 
+                      motif: Motif) -> None:
         """
         Display the motif as a graph.
         Inputs:
@@ -383,6 +403,12 @@ class AutoMotif:
         """
         Graph = motif.to_nx()
         nx.draw(Graph, with_labels = True)
+        if self.save:
+            dir_to_save = self.path
+            raw_name = [(source, target) for source, target, *_ in motif._g.edges]
+            name = self.generate_unique_filename(raw_name)
+            os.makedirs(os.path.join(dir_to_save, "Motifs"), exist_ok = True)
+            plt.savefig(os.path.join(dir_to_save, "Motifs", f"{name}"))
     
     def display_all_motifs(self) -> None:
         """Display all motifs found in the graph."""
