@@ -248,7 +248,7 @@ class AutoMotif:
             else:
                 result = self.Ex.find(motif)
             result_df = pd.DataFrame(result)
-            result_df.to_csv(os.path.join(dir_to_save, f"Size_{size}", f"{name}"))
+            result_df.to_parquet(os.path.join(dir_to_save, f"Size_{size}", f"{name}"))
             if self.verbose == True:
                 print("Saved motif to", os.path.join(dir_to_save, f"Size_{size}", f"{name}"))
         else:
